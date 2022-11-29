@@ -2,6 +2,8 @@
 
 # Better Import
 
+⚠️ Early version, not for production use ⚠️
+
 This package makes import to Unity easier and more efficient
 
 ## Built-in Postprocessors
