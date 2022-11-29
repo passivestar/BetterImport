@@ -1,21 +1,23 @@
+![betterimport](https://user-images.githubusercontent.com/60579014/204586011-c40e7390-216b-4bbd-8851-258bea93a7d4.jpg)
+
 # Better Import
 
-This package has multiple features for making import to Unity easier and more efficient
+This package makes import to Unity easier and more efficient
 
 ## Built-in Postprocessors
 
-These postprocessors are enabled by default:
+Better Import comes with these postprocessors now:
 
-- Animations: Animations postprocessor automatically creates animator controllers for models that have animations
-- Materials: Materials postprocessor automatically generates Metallic-Smoothness maps for imported models
-- Lights: Light postprocessor can modify properties of imported lights
+- **Animations**: Automatically creates animator controllers for models that have animations
+- **Materials**: Automatically generates Metallic-Smoothness maps for imported models
+- **Lights**: Can modify properties of imported lights
 
 ## Built-in Hints
 
 Better Import comes with these built-in hints:
 
-- GameObject (hints in objects' names)
-    - `-prefab`: Replaces the object with a prefab. Creates a new prefab automatically if it doesn't exist
+- **GameObject** (hints in objects' names)
+    - `-prefab`: Replaces the object with a prefab
     - `-inactive`: Deactivates the object
     - `-static`: Sets the object to static
     - `-lightprobe`: Replaces the object with a light probe
@@ -24,11 +26,14 @@ Better Import comes with these built-in hints:
     - `-trigger`: Replaces the object with a trigger
     - `-volume`: Replaces the object with an SRP postprocessing volume
     - `-boxcollider`: Adds a box collider to the object
-- Model (hints in model filenames)
+
+- **Model** (hints in models' filenames)
     - `-collider`: Generates a mesh collider for the model
-- Animation (hints in actions' names)
+
+- **Animation** (hints in actions' names)
     - `-loop`: Sets the animation to loop
-- Material (hints in materials' names)
+
+- **Material** (hints in materials' names)
     - `-rough`: Sets the material Smoothness to 0
     - `-smooth`: Sets the material Smoothness to 1
 
@@ -36,7 +41,7 @@ Better Import comes with these built-in hints:
 
 You can create your own hints by subclassing `GameObjectHint`, `ModelHint`, `AnimationHint` and `MaterialHint`
 
-For example:
+Example:
 
 ```csharp
 using UnityEngine;
