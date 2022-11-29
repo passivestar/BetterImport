@@ -1,0 +1,15 @@
+{
+    "name": "com.passivestar.betterimport",
+    "version": "0.1.0",
+    "displayName": "Better Import",
+    "description": "Better Import for Unity",
+    "license": "See LICENSE.md",
+    "unity": "2022.1",
+    "keywords": [
+        "Import"
+    ],
+    "author": {
+        "name": "passivestar",
+        "url": "https://discord.gg/pPHQ5HQ"
+    }
+}
