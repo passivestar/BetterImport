@@ -30,7 +30,7 @@ Better Import comes with these built-in hints:
     - `-boxcollider`: Adds a box collider to the object
 
 - **Model** (hints in models' filenames)
-    - `-collider`: Generates a mesh collider for the model
+    - `-collider`: Generates mesh colliders for the model
 
 - **Animation** (hints in actions' names)
     - `-loop`: Sets the animation to loop
