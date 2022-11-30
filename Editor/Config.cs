@@ -1,4 +1,3 @@
-using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -11,7 +10,6 @@ namespace BetterImport
     public class Config : EditorWindow
     {
         static Config window;
-        static string configPath = "Packages/com.passivestar.betterimport/config.json";
         public static ConfigData data;
 
         public struct ConfigData
@@ -25,13 +23,15 @@ namespace BetterImport
 
         public static Dictionary<string, bool> hints = new Dictionary<string, bool>();
 
-        static Config()
-        {
-            var hintTypes = Hint.GetHintTypes();
+        List<System.Type> hintTypes;
 
-            if (File.Exists(configPath))
+        void OnEnable()
+        {
+            RefreshHintTypes();
+
+            if (ConfigExists())
             {
-                data = JsonUtility.FromJson<ConfigData>(File.ReadAllText(configPath));
+                data = ReadConfig();
                 foreach (var hint in data.enabledHints)
                 {
                     hints.Add(hint, true);
@@ -65,10 +65,25 @@ namespace BetterImport
             SaveConfig();
         }
 
+        void RefreshHintTypes()
+        {
+            hintTypes = Hint.GetHintTypes();
+        }
+
+        static bool ConfigExists()
+        {
+            return EditorPrefs.HasKey("BetterImportConfig");
+        }
+
+        static ConfigData ReadConfig()
+        {
+            return JsonUtility.FromJson<ConfigData>(EditorPrefs.GetString("BetterImportConfig"));
+        }
+
         static void SaveConfig()
         {
             data.enabledHints = hints.Keys.ToList().FindAll(key => hints[key]);
-            File.WriteAllText(configPath, JsonUtility.ToJson(data));
+            EditorPrefs.SetString("BetterImportConfig", JsonUtility.ToJson(data));
         }
 
         public static bool IsHintEnabled(System.Object hint)
@@ -107,6 +122,11 @@ namespace BetterImport
                 hintsExpanded = EditorGUILayout.BeginFoldoutHeaderGroup(hintsExpanded, "List of Hints");
                 if (hintsExpanded)
                 {
+                    if (GUILayout.Button("Refresh Hint Types"))
+                    {
+                        RefreshHintTypes();
+                    }
+
                     EditorGUILayout.BeginHorizontal();
                     if (GUILayout.Button("Select All"))
                     {
@@ -128,7 +148,7 @@ namespace BetterImport
 
                     EditorGUILayout.BeginVertical(GUI.skin.box);
 
-                    foreach (var type in Hint.GetHintTypes())
+                    foreach (var type in hintTypes)
                     {
                         var baseClassName = Regex.Replace(type.BaseType.Name, "Hint$", "");
                         var name = Regex.Replace(type.Name, "Hint$", "");
