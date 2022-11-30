@@ -10,6 +10,7 @@ namespace BetterImport
     public class Config : EditorWindow
     {
         static Config window;
+        public const string configKey = "BetterImportConfig";
         public static ConfigData data;
 
         public struct ConfigData
@@ -72,18 +73,18 @@ namespace BetterImport
 
         static bool ConfigExists()
         {
-            return EditorPrefs.HasKey("BetterImportConfig");
+            return EditorPrefs.HasKey(configKey);
         }
 
         static ConfigData ReadConfig()
         {
-            return JsonUtility.FromJson<ConfigData>(EditorPrefs.GetString("BetterImportConfig"));
+            return JsonUtility.FromJson<ConfigData>(EditorPrefs.GetString(configKey));
         }
 
         static void SaveConfig()
         {
             data.enabledHints = hints.Keys.ToList().FindAll(key => hints[key]);
-            EditorPrefs.SetString("BetterImportConfig", JsonUtility.ToJson(data));
+            EditorPrefs.SetString(configKey, JsonUtility.ToJson(data));
         }
 
         public static bool IsHintEnabled(System.Object hint)
