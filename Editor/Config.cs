@@ -24,9 +24,14 @@ namespace BetterImport
 
         public static Dictionary<string, bool> hints = new Dictionary<string, bool>();
 
-        List<System.Type> hintTypes;
+        static List<System.Type> hintTypes;
 
         void OnEnable()
+        {
+            Init();
+        }
+
+        static void Init()
         {
             RefreshHintTypes();
 
@@ -35,7 +40,10 @@ namespace BetterImport
                 data = ReadConfig();
                 foreach (var hint in data.enabledHints)
                 {
-                    hints.Add(hint, true);
+                    if (!hints.ContainsKey(hint))
+                    {
+                        hints.Add(hint, true);
+                    }
                 }
                 foreach (var type in hintTypes)
                 {
@@ -48,6 +56,7 @@ namespace BetterImport
             }
             else
             {
+                Debug.Log("BetterImport: No config found, creating default config");
                 data = new ConfigData();
                 data.enableHints = true;
                 data.enabledHints = new List<string>();
@@ -55,18 +64,23 @@ namespace BetterImport
                 data.createMetallicSmoothnessMaps = true;
                 data.globalLightsIntensityMultiplier = 1.0f;
 
+                hints = new Dictionary<string, bool>();
+
                 foreach (var type in hintTypes)
                 {
                     var name = Regex.Replace(type.Name, "Hint$", "");
                     data.enabledHints.Add(name);
-                    hints.Add(name, true);
+                    if (!hints.ContainsKey(name))
+                    {
+                        hints.Add(name, true);
+                    }
                 }
             }
 
             SaveConfig();
         }
 
-        void RefreshHintTypes()
+        static void RefreshHintTypes()
         {
             hintTypes = Hint.GetHintTypes();
         }
@@ -93,7 +107,7 @@ namespace BetterImport
             return hints.ContainsKey(name) && hints[name];
         }
 
-        [MenuItem("Window/Better Import Settings")]
+        [MenuItem("Tools/Better Import/Settings")]
         public static void ShowWindow()
         {
             window = GetWindow<Config>();
@@ -101,6 +115,13 @@ namespace BetterImport
             window.minSize = new Vector2(200, 200);
             window.maxSize = new Vector2(800, 1000);
             window.Show();
+        }
+
+        [MenuItem("Tools/Better Import/Reset Config")]
+        public static void ResetConfig()
+        {
+            EditorPrefs.DeleteKey(configKey);
+            Init();
         }
 
         bool hintsExpanded = false;
