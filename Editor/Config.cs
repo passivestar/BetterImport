@@ -22,7 +22,7 @@ namespace BetterImport
             public float globalLightsIntensityMultiplier;
         }
 
-        public static Dictionary<string, bool> hints = new Dictionary<string, bool>();
+        public static Dictionary<string, bool> hints = new();
 
         static List<System.Type> hintTypes;
 
