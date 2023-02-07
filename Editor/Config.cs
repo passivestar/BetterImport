@@ -26,7 +26,7 @@ namespace BetterImport
 
         static List<System.Type> hintTypes;
 
-        void OnEnable()
+        static Config()
         {
             Init();
         }
