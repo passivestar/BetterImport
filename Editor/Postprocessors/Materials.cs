@@ -7,24 +7,26 @@ using UnityEditor.AssetImporters;
 
 namespace BetterImport
 {
-public class MaterialsPostprocessor : AssetPostprocessor
+    public class MaterialsPostprocessor : AssetPostprocessor
     {
+        static string[] albedoNames = new string[] { "Albedo", "Diffuse", "Base Color", "BaseColor", "Color", "ColorMap", "DiffuseMap", "BaseColorMap", "AlbedoMap", "COL" };
+        static string[] normalNames = new string[] { "Normal", "NormalMap", "Normal Map", "NRM", "NRMMap", "NRM Map" };
+
         void OnPreprocessTexture()
         {
-            if (!Config.data.createMetallicSmoothnessMaps)
-            {
-                return;
-            }
-
             var filename = Path.GetFileNameWithoutExtension(assetPath);
             var textureImporter = (TextureImporter)assetImporter;
 
-            if (filename.Contains("Normal"))
+            if (Config.data.fixNormalMapsType && normalNames.Any(name => filename.Contains(name)))
             {
                 textureImporter.textureType = TextureImporterType.NormalMap;
             }
 
-            if (!(filename.EndsWith("Metallic") || filename.EndsWith("Roughness") || filename.EndsWith("Smoothness")))
+            var isMetallicSmoothness = filename.EndsWith("Metallic") || filename.EndsWith("Roughness") || filename.EndsWith("Smoothness");
+            var isAlbedo = albedoNames.Any(name => filename.Contains(name));
+
+            if ((Config.data.createMetallicSmoothnessMaps || Config.data.createAlbedoAlphaMaps)
+                && !(isMetallicSmoothness || isAlbedo))
             {
                 return;
             }
@@ -36,29 +38,36 @@ public class MaterialsPostprocessor : AssetPostprocessor
 
         void OnPostprocessTexture(Texture2D texture)
         {
-            if (!Config.data.createMetallicSmoothnessMaps)
-            {
-                return;
-            }
-
             var filename = Path.GetFileNameWithoutExtension(assetPath);
 
-            if (filename.EndsWith("Metallic") && !MetallicSmoothnessAlreadyExists("Metallic"))
+            if (Config.data.createMetallicSmoothnessMaps)
             {
-                ProcessMetallicTexture(texture, filename);
-                return;
+                if (filename.EndsWith("Metallic") && !MetallicSmoothnessAlreadyExists("Metallic"))
+                {
+                    ProcessMetallicTexture(texture, filename);
+                    return;
+                }
+
+                if (filename.EndsWith("Roughness") && !MetallicSmoothnessAlreadyExists("Roughness"))
+                {
+                    ProcessRoughnessTexture(texture, filename);
+                    return;
+                }
+
+                if (filename.EndsWith("Smoothness") && !filename.EndsWith("MetallicSmoothness") && !MetallicSmoothnessAlreadyExists("Smoothness"))
+                {
+                    ProcessSmoothnessTexture(texture, filename);
+                    return;
+                }
             }
 
-            if (filename.EndsWith("Roughness") && !MetallicSmoothnessAlreadyExists("Roughness"))
+            if (Config.data.createAlbedoAlphaMaps)
             {
-                ProcessRoughnessTexture(texture, filename);
-                return;
-            }
-
-            if (filename.EndsWith("Smoothness") && !filename.EndsWith("MetallicSmoothness") && !MetallicSmoothnessAlreadyExists("Smoothness"))
-            {
-                ProcessSmoothnessTexture(texture, filename);
-                return;
+                if (filename.EndsWith("Alpha") && !filename.EndsWith("AlbedoAlpha"))
+                {
+                    ProcessAlphaTexture(texture, filename);
+                    return;
+                }
             }
         }
 
@@ -68,6 +77,14 @@ public class MaterialsPostprocessor : AssetPostprocessor
             var directory = Path.GetDirectoryName(assetPath);
             var extension = Path.GetExtension(assetPath);
             return Path.Combine(directory, filename.Replace(suffix, "MetallicSmoothness") + ".png");
+        }
+
+        string GetAlbedoAlphaPath()
+        {
+            var filename = Path.GetFileNameWithoutExtension(assetPath);
+            var directory = Path.GetDirectoryName(assetPath);
+            var extension = Path.GetExtension(assetPath);
+            return Path.Combine(directory, filename.Replace("Alpha", "AlbedoAlpha") + ".png");
         }
 
         bool MetallicSmoothnessAlreadyExists(string suffix)
@@ -160,6 +177,18 @@ public class MaterialsPostprocessor : AssetPostprocessor
             }, null, smoothness);
         }
 
+        void CombineTexturesAlbedoAlpha(string path, Texture2D albedo, Texture2D alpha)
+        {
+            CombineTextures(path, (albedoPixels, alphaPixels) =>
+            {
+                for (int i = 0; i < albedoPixels.Length; i++)
+                {
+                    albedoPixels[i].a = alphaPixels[i].r;
+                }
+                return albedoPixels;
+            }, albedo, alpha);
+        }
+
         void ProcessMetallicTexture(Texture2D texture, string filename)
         {
             Texture2D metallic = texture;
@@ -229,33 +258,76 @@ public class MaterialsPostprocessor : AssetPostprocessor
             }
         }
 
+        string FindAlbedoTexturePathForAlphaTexture()
+        {
+            var possibleAlbedoPaths = albedoNames.Select(name => assetPath.Replace("Alpha", name)).ToList();
+            return possibleAlbedoPaths.FirstOrDefault(File.Exists);
+        }
+
+        void ProcessAlphaTexture(Texture2D texture, string filename)
+        {
+            Texture2D alpha = texture;
+            var albedoPath = FindAlbedoTexturePathForAlphaTexture();
+            var albedoAlphaPath = GetAlbedoAlphaPath();
+
+            if (albedoPath != null)
+            {
+                var albedo = AssetDatabase.LoadAssetAtPath<Texture2D>(albedoPath);
+                if (albedo != null)
+                {
+                    CombineTexturesAlbedoAlpha(albedoAlphaPath, albedo, alpha);
+                }
+            }
+        }
+
         public void OnPreprocessMaterialDescription(MaterialDescription description, Material material, AnimationClip[] materialAnimation)
         {
-            if (!Config.data.createMetallicSmoothnessMaps)
-            {
-                return;
-            }
-
-            // Try to assign the metallic-smoothness map:
             var materialName = description.materialName;
             var textures = AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets" });
 
-            var metallicSmoothnessMapPath = textures
-                .Select(AssetDatabase.GUIDToAssetPath)
-                .FirstOrDefault(t =>
-                {
-                    var filename = Path.GetFileNameWithoutExtension(t);
-                    return filename.Contains(materialName) && filename.Contains("MetallicSmoothness");
-                });
+            if (Config.data.createMetallicSmoothnessMaps)
+            {
+                // Try to assign the metallic-smoothness map:
 
-            if (metallicSmoothnessMapPath != null)
-            {
-                var metallicSmoothnessMap = AssetDatabase.LoadAssetAtPath<Texture2D>(metallicSmoothnessMapPath);
-                material.SetTexture("_MetallicGlossMap", metallicSmoothnessMap);
+                var metallicSmoothnessMapPath = textures
+                    .Select(AssetDatabase.GUIDToAssetPath)
+                    .FirstOrDefault(t =>
+                    {
+                        var filename = Path.GetFileNameWithoutExtension(t);
+                        return filename.Contains(materialName) && filename.Contains("MetallicSmoothness");
+                    });
+
+                if (metallicSmoothnessMapPath != null)
+                {
+                    var metallicSmoothnessMap = AssetDatabase.LoadAssetAtPath<Texture2D>(metallicSmoothnessMapPath);
+                    material.SetTexture("_MetallicGlossMap", metallicSmoothnessMap);
+                }
+                else
+                {
+                    material.SetFloat("_Smoothness", 0f);
+                }
             }
-            else
+
+            if (Config.data.createAlbedoAlphaMaps)
             {
-                material.SetFloat("_Smoothness", 0f);
+                // Try to assign the albedo-alpha map:
+
+                var albedoAlphaMapPath = textures
+                    .Select(AssetDatabase.GUIDToAssetPath)
+                    .FirstOrDefault(t =>
+                    {
+                        var filename = Path.GetFileNameWithoutExtension(t);
+                        return filename.Contains(materialName) && filename.Contains("AlbedoAlpha");
+                    });
+                
+                if (albedoAlphaMapPath != null)
+                {
+                    var albedoAlphaMap = AssetDatabase.LoadAssetAtPath<Texture2D>(albedoAlphaMapPath);
+                    material.SetTexture("_BaseMap", albedoAlphaMap);
+
+                    // Set urp surface type to transparent:
+                    material.SetInt("_Surface", 1);
+                }
             }
         }
     }

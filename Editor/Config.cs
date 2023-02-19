@@ -18,7 +18,9 @@ namespace BetterImport
             public bool enableHints;
             public List<string> enabledHints;
             public bool createAnimationControllers;
+            public bool fixNormalMapsType;
             public bool createMetallicSmoothnessMaps;
+            public bool createAlbedoAlphaMaps;
             public float globalLightsIntensityMultiplier;
         }
 
@@ -61,7 +63,9 @@ namespace BetterImport
                 data.enableHints = true;
                 data.enabledHints = new List<string>();
                 data.createAnimationControllers = true;
+                data.fixNormalMapsType = true;
                 data.createMetallicSmoothnessMaps = true;
+                data.createAlbedoAlphaMaps = true;
                 data.globalLightsIntensityMultiplier = 1.0f;
 
                 hints = new Dictionary<string, bool>();
@@ -192,7 +196,9 @@ namespace BetterImport
 
             EditorGUILayout.Space(10f);
             EditorGUILayout.LabelField("Materials", EditorStyles.largeLabel);
+            data.fixNormalMapsType = EditorGUILayout.ToggleLeft("Fix Normal Maps Type", data.fixNormalMapsType);
             data.createMetallicSmoothnessMaps = EditorGUILayout.ToggleLeft("Create Metallic-Smoothness Maps", data.createMetallicSmoothnessMaps);
+            data.createAlbedoAlphaMaps = EditorGUILayout.ToggleLeft("Create Albedo-Alpha Maps", data.createAlbedoAlphaMaps);
 
             // Lights
 
