@@ -119,13 +119,13 @@ namespace BetterImport
 
                             if (!sourceFound)
                             {
-                                UnityEngine.Object.DestroyImmediate(go);
+                                Object.DestroyImmediate(go);
                             }
                         }
                         // Destroy the container if it's empty
                         if (obj.transform.childCount == 0)
                         {
-                            UnityEngine.Object.DestroyImmediate(obj);
+                            Object.DestroyImmediate(obj);
                         }
                     }
 
