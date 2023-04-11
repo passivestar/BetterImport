@@ -164,6 +164,11 @@ namespace BetterImport
 
                             var derivedObject = hint.CreateGameObject(obj, container);
 
+                            if (derivedObject == null)
+                            {
+                                continue;
+                            }
+
                             // Sync position
                             var transform = obj.transform;
                             derivedObject.transform.position = transform.position;
