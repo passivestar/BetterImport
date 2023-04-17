@@ -28,6 +28,7 @@ Better Import comes with these built-in hints:
     - `-trigger`: Replaces the object with a trigger
     - `-volume`: Replaces the object with an SRP postprocessing volume
     - `-boxcollider`: Adds a box collider to the object
+    - `-nocollider`: Disables the mesh collider
 
 - **Model** (hints in models' filenames)
     - `-collider`: Generates mesh colliders for the model
