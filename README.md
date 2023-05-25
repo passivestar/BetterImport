@@ -29,9 +29,9 @@ Better Import comes with these built-in hints:
     - `-boxcollider`: Adds a box collider to the object
     - `-nocollider`: Disables the mesh collider
     - `-norender`: Disables the mesh renderer
-    - `rigidbody`: Adds a rigidbody to the object
-    - `bakedlight`: Sets the light mode to baked
-    - `mixedlight`: Sets the light mode to mixed
+    - `-rigidbody`: Adds a rigidbody to the object
+    - `-bakedlight`: Sets the light mode to baked
+    - `-mixedlight`: Sets the light mode to mixed
 
 - **Model** (hints in models' filenames)
     - `-collider`: Generates mesh colliders for the model
