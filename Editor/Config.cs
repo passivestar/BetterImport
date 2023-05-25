@@ -21,20 +21,23 @@ namespace BetterImport
             public bool fixNormalMapsType;
             public bool createMetallicSmoothnessMaps;
             public bool createAlbedoAlphaMaps;
-            public float globalLightsIntensityMultiplier;
+            public bool makeMaterialsRoughByDefault;
         }
 
         public static Dictionary<string, bool> hints = new();
 
         static List<System.Type> hintTypes;
 
-        static Config()
+        void OnEnable()
         {
             Init();
         }
 
+        [InitializeOnLoadMethod]
         static void Init()
         {
+            // Debug.Log("BetterImport: Refreshing config...");
+
             RefreshHintTypes();
 
             if (ConfigExists())
@@ -52,7 +55,7 @@ namespace BetterImport
                     var name = Regex.Replace(type.Name, "Hint$", "");
                     if (!hints.ContainsKey(name))
                     {
-                        hints.Add(name, false);
+                        hints.Add(name, true);
                     }
                 }
             }
@@ -66,7 +69,7 @@ namespace BetterImport
                 data.fixNormalMapsType = true;
                 data.createMetallicSmoothnessMaps = true;
                 data.createAlbedoAlphaMaps = true;
-                data.globalLightsIntensityMultiplier = 1.0f;
+                data.makeMaterialsRoughByDefault = true;
 
                 hints = new Dictionary<string, bool>();
 
@@ -177,8 +180,9 @@ namespace BetterImport
                     foreach (var type in hintTypes)
                     {
                         var baseClassName = Regex.Replace(type.BaseType.Name, "Hint$", "");
+                        var hintText = type.GetProperty("Text").GetValue(null) as string;
                         var name = Regex.Replace(type.Name, "Hint$", "");
-                        hints[name] = EditorGUILayout.ToggleLeft($"{baseClassName} ➜ {name}", hints[name]);
+                        hints[name] = EditorGUILayout.ToggleLeft($"{baseClassName}{hintText}", hints[name]);
                     }
 
                     EditorGUILayout.EndVertical();
@@ -199,13 +203,7 @@ namespace BetterImport
             data.fixNormalMapsType = EditorGUILayout.ToggleLeft("Fix Normal Maps Type", data.fixNormalMapsType);
             data.createMetallicSmoothnessMaps = EditorGUILayout.ToggleLeft("Create Metallic-Smoothness Maps", data.createMetallicSmoothnessMaps);
             data.createAlbedoAlphaMaps = EditorGUILayout.ToggleLeft("Create Albedo-Alpha Maps", data.createAlbedoAlphaMaps);
-
-            // Lights
-
-            EditorGUILayout.Space(10f);
-            EditorGUILayout.LabelField("Lights", EditorStyles.largeLabel);
-            EditorGUILayout.LabelField("Global Lights Intensity Multiplier");
-            data.globalLightsIntensityMultiplier = EditorGUILayout.Slider(data.globalLightsIntensityMultiplier, 0.0f, 100.0f);
+            data.makeMaterialsRoughByDefault = EditorGUILayout.ToggleLeft("Make Materials Rough By Default", data.makeMaterialsRoughByDefault);
 
             EditorGUILayout.EndVertical();
 
