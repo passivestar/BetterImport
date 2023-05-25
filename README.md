@@ -11,8 +11,7 @@ This package makes import to Unity easier and more efficient
 Better Import comes with these postprocessors now:
 
 - **Animations**: Automatically creates animator controllers for models that have animations
-- **Materials**: Automatically generates Metallic-Smoothness maps for imported models
-- **Lights**: Can modify properties of imported lights
+- **Materials**: Automatically generates Metallic-Smoothness and Albedo-Alpha maps for imported materials
 
 ## Built-in Hints
 
@@ -29,6 +28,10 @@ Better Import comes with these built-in hints:
     - `-volume`: Replaces the object with an SRP postprocessing volume
     - `-boxcollider`: Adds a box collider to the object
     - `-nocollider`: Disables the mesh collider
+    - `-norender`: Disables the mesh renderer
+    - `rigidbody`: Adds a rigidbody to the object
+    - `bakedlight`: Sets the light mode to baked
+    - `mixedlight`: Sets the light mode to mixed
 
 - **Model** (hints in models' filenames)
     - `-collider`: Generates mesh colliders for the model
