@@ -10,7 +10,7 @@ namespace BetterImport
     public class MaterialsPostprocessor : AssetPostprocessor
     {
         static string[] albedoNames = new string[] { "Albedo", "Diffuse", "Base Color", "BaseColor", "Color", "ColorMap", "DiffuseMap", "BaseColorMap", "AlbedoMap", "COL" };
-        static string[] normalNames = new string[] { "Normal", "NormalMap", "Normal Map", "NRM", "NRMMap", "NRM Map" };
+        static string[] normalNames = new string[] { "Normal", "NormalMap", "Normal Map", "NRM", "NRMMap", "NRM Map", "nor_gl" };
 
         void OnPreprocessTexture()
         {
@@ -328,6 +328,11 @@ namespace BetterImport
                     // Set urp surface type to transparent:
                     material.SetInt("_Surface", 1);
                 }
+            }
+
+            if (Config.data.makeMaterialsRoughByDefault)
+            {
+                material.SetFloat("_Smoothness", 0f);
             }
         }
     }
