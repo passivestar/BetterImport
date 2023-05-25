@@ -1,4 +1,4 @@
-![betterimport](https://user-images.githubusercontent.com/60579014/204586011-c40e7390-216b-4bbd-8851-258bea93a7d4.jpg)
+![betterimport](https://github.com/passivestar/BetterImport/assets/60579014/dadd66fb-51f4-45bb-830e-f2cefa883b08)
 
 # Better Import
 
